@@ -3,8 +3,8 @@
 		<title>complex number function plotter</title> 
 
 		<script type="text/javascript" src="js/jquery-2.1.1.min.js"></script>
-		<script type="text/javascript" src="js/three.min.js"></script> 
-		<script type="text/javascript" src="js/OrbitControls.js"></script>
+		<!--<script type="text/javascript" src="js/three.min.js"></script> 
+		<script type="text/javascript" src="js/OrbitControls.js"></script>-->
 
 		<style> 
 			body {
@@ -24,8 +24,8 @@
 
 			var size = 20;
 
-			init();
-			animate();
+			//init();
+			//animate();
 
 			function init() {
 				scene = new THREE.Scene();
@@ -99,7 +99,80 @@
 			function dist(x1, y1, z1, x2, y2, z2){
 				return Math.sqrt(Math.pow(x2-x1,2) + Math.pow(y2-y1,2) + Math.pow(z2-z1,2));
 			}
+
+			function roundVal(val, decPlaces){
+				if(('' + val).split('.').length > 1){ //if has decimal places TODO check better?
+					var fact = Math.pow(10,decPlaces);
+					return Math.round(val * fact) / fact;
+				} else {
+					return val;
+				}	
+			}
+
+			var C = function(r, i){
+				this.r = r;
+				this.i = i;
+				this.length = Math.sqrt(Math.pow(r,2) + Math.pow(i,2));
+				this.angle = Math.atan(i / r);
+				this.toString = function(){
+					return '(' + roundVal(this.r,2) + ' ' + (this.i < 0 ? '-' : '+') + ' ' + (Math.abs(this.i) == 1 ? 'i' : roundVal(Math.abs(this.i),2) + 'i') + ')'; 
+				}
+			}  
+
+			var add = function(C1, C2){
+				return new C(C1.r + C2.r, C1.i + C2.i);
+			}
+
+			var sub = function (C1, C2){
+				return new C(C1.r - C2.r, C1.i - C2.i);
+			}
+
+			var mul = function(C1, C2){//(a + bi) (g + hi) = ag + ahi + big - bh
+				var newR = C1.r * C2.r - C1.i * C2.i; 
+				var newI = C1.r * C2.i + C1.i * C2.r;
+				return new C(newR, newI);
+			}
+
+			var div = function(C1, C2){
+				var divisor = Math.pow(C2.r,2) + Math.pow(C2.i,2);
+				var newR = (C1.r * C2.r + C1.i * C2.i) / divisor;
+				var newI = (C1.i * C1.r - C1.r * C2.i) / divisor;
+				return new C(newR, newI);
+			}
+
+			var pow = function(Cbase, exp){
+				if(exp == 0)
+					return new C(1, 0);
+				var temp = new C(Cbase.r, Cbase.i);
+				for(var i = 1; i < exp; i++){
+					temp = mul(temp, Cbase);
+				}
+				return temp;
+			}
+
+			//TODO sqrt
+
+			$(document).ready(function() {
+
+				var c1 = new C(1, 2);
+				var c2 = new C(2, 3)
+				console.log(c1 + ' * ' + c2 + ' = ' + mul(c1,c2));
+				console.log(c1 + ' + ' + c2 + ' = ' + add(c1,c2));
+				console.log(c1 + ' - ' + c2 + ' = ' + sub(c1,c2));
+				console.log(c1 + ' / ' + c2 + ' = ' + div(c1,c2));
+				console.log(c1 + '^3 = ' + pow(c1,3));
+
+			});
+
+
+
+			/* PARKING LOT */
 	
 		</script>
 	</body> 
 </html>
+
+
+
+
+
