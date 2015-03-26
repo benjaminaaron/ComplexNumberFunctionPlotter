@@ -31,7 +31,9 @@
             });*/
 
             var plotter = new Plotter();
-            plotter.start();
+            plotter.start(function(input) {
+                return input.pow(2);
+            }, 2, 2, 0.2);
 
             /* PARKING LOT
 
