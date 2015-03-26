@@ -43,6 +43,12 @@ Plotter.prototype = {
         this.renderer.render(this.scene, this.camera);
     },
 
+    clear: function() {
+        for(var i = 0; i < this.scene.children.length; ++i) {
+            this.scene.remove(this.scene.children[i]);
+        }
+    },
+
     start: function(calc, width, height, steps) {
         // INPUT PLANE
         this.geometry = new THREE.PlaneBufferGeometry(width, height, 32);

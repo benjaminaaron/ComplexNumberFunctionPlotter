@@ -23,3 +23,7 @@ function roundVal(val, decPlaces){
         return val;
     }
 }
+
+function convertFn(string) {
+    return Function("c", "return " + string + ";");
+};
