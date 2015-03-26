@@ -10,30 +10,45 @@
         <script type="text/javascript" src="js/c.js"></script>
         <script type="text/javascript" src="js/plotter.js"></script>
         <style>
+            #controls {
+                width: 100%;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                z-index: 2000;
+                background: #FFF;
+                padding: 10px 0;
+                border-bottom: 1px solid #AAA;
+                text-align: center;
+            }
         </style>
     </head>
     <body>
-
+        <div id="controls">
+        f(c)= <input type="text" id="controls-fn" value="c.pow(2)" />
+        real-range: <input type="number" value="6" id="controls-r" />
+        imag-range: <input type="number" value="6" id="controls-i" />
+        steps: <input type="number" value="1" id="controls-steps" />
+        <input type="submit" id="controls-submit" value="Render" />
+        </div>
         <div id="ThreeJS" style="z-index: 1; position: absolute; left:0px; top:0px"></div>
 
         <script>
 
-            //TODO sqrt
-
-            /*$(document).ready(function() {
-                var c1 = new C(1, 2);
-                var c2 = new C(2, 3)
-                console.log(c1 + ' * ' + c2 + ' = ' + mul(c1,c2));
-                console.log(c1 + ' + ' + c2 + ' = ' + add(c1,c2));
-                console.log(c1 + ' - ' + c2 + ' = ' + sub(c1,c2));
-                console.log(c1 + ' / ' + c2 + ' = ' + div(c1,c2));
-                console.log(c1 + '^3 = ' + pow(c1,3));
-            });*/
-
             var plotter = new Plotter();
-            plotter.start(function(input) {
-                return input.pow(2);
-            }, 2, 2, 0.2);
+            $("#controls-submit").on("click", function() {
+                plotter.clear();
+
+                var f = convertFn($("#controls-fn").val());
+                var r = 1 * $("#controls-r").val();
+                var i = 1 * $("#controls-r").val();
+                var steps = 1 * $("#controls-steps").val();
+
+                console.log(f, r, i, steps);
+
+                plotter.start(f, r, i, steps);
+            });
 
             /* PARKING LOT
 
