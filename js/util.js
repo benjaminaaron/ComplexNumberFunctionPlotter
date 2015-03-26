@@ -1,3 +1,5 @@
+
+/*
 function randomColor(){
     return '#' + Math.floor(Math.random() * 16777215).toString(16);
 }
@@ -14,6 +16,7 @@ function showPoint(x, y, z){
 function dist(x1, y1, z1, x2, y2, z2){
     return Math.sqrt(Math.pow(x2-x1,2) + Math.pow(y2-y1,2) + Math.pow(z2-z1,2));
 }
+*/
 
 function roundVal(val, decPlaces){
     if(val !== Math.ceil(val)){ //if has decimal places

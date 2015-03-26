@@ -7,7 +7,7 @@
         <script type="text/javascript" src="js/vendors/OrbitControls.js"></script>
 
         <script type="text/javascript" src="js/util.js"></script>
-        <script type="text/javascript" src="js/c.js"></script>
+        <script type="text/javascript" src="js/c-math.js"></script>
         <script type="text/javascript" src="js/plotter.js"></script>
         <style>
             #controls {
@@ -16,51 +16,74 @@
                 top: 0;
                 left: 0;
                 right: 0;
-                z-index: 2000;
+                z-index: 5;
                 background: #FFF;
                 padding: 10px 0;
                 border-bottom: 1px solid #AAA;
                 text-align: center;
+                font-family: Georgia, sans-serif;
+                font-size:  14px;
             }
         </style>
     </head>
     <body>
+
         <div id="controls">
-        f(c)= <input type="text" id="controls-fn" value="c.pow(2)" />
-        real-range: <input type="number" value="6" id="controls-r" />
-        imag-range: <input type="number" value="6" id="controls-i" />
-        steps: <input type="number" value="1" id="controls-steps" />
-        <input type="submit" id="controls-submit" value="Render" />
+            <b>f(c) =</b> <input type="text" id="controls-fn" value="c.pow(2)" size="16" />&nbsp;
+            <b>width</b>: <input title="real length of the input plane" type="number" value="5" id="controls-r" style="width:40px"/>&nbsp;
+            <b>height</b>: <input title="img length of the input plane" type="number" value="5" id="controls-i" style="width:40px"/>&nbsp;
+            <b>delta</b>: <input title="delta in which the input plane is being stepped through for input values c" type="number" value="0.5" id="controls-steps" style="width:50px"/>&nbsp;
+            <b>distance</b>: <input title="distance between input and result plane" type="number" value="30" id="controls-distance" style="width:40px" />&nbsp;
+            <b>color</b>: <input title="toggling the r part in the color coding of the lines" type="checkbox" id="controls-r-checkbox" checked><input title="toggling g" type="checkbox" id="controls-g-checkbox"><input title="toggling b" type="checkbox" id="controls-b-checkbox">&nbsp;
+            <input  type="submit" id="controls-submit" value="Render"/>&nbsp;&nbsp;&nbsp;
+            examples: <select id='examplesList' style="width:70px">
+                <option value="c.pow(2)_5_5_0.5_30_T_F_F">default</option>
+                <option value="c.pow(2)_2_2_0.22_6_F_T_T">1</option>
+                <option value="c.mul(new C(0,1))_3_3_0.35_10_F_F_F">2</option>
+                <option value="c.pow(2).div(new C(-2,2))_9_9_0.6_60_T_T_F">3</option>
+                <option value="c.div(new C(1,1))_10_10_0.8_60_T_F_T">4</option>
+                <option>add one?</option>  
+            </select>
         </div>
         <div id="ThreeJS" style="z-index: 1; position: absolute; left:0px; top:0px"></div>
 
         <script>
 
-            var plotter = new Plotter();
-            $("#controls-submit").on("click", function() {
-                plotter.clear();
-
-                var f = convertFn($("#controls-fn").val());
-                var r = 1 * $("#controls-r").val();
-                var i = 1 * $("#controls-r").val();
-                var steps = 1 * $("#controls-steps").val();
-
-                console.log(f, r, i, steps);
-
-                plotter.start(f, r, i, steps);
+            $('#examplesList').on('change', function (e) {               
+                var values = this.value.split('_');
+                if(values.length == 1)
+                    alert('Yey, got a cool configuration?\nSend it to me and I\'ll put it in!\n\nbenjamin.degenhart@gmail.com');
+                else {
+                    $("#controls-fn").val(values[0]);
+                    $("#controls-r").val(values[1]);
+                    $("#controls-i").val(values[2]);
+                    $("#controls-steps").val(values[3]);
+                    $("#controls-distance").val(values[4]);
+                    $('#controls-r-checkbox').prop('checked', values[5] == 'T');
+                    $('#controls-g-checkbox').prop('checked', values[6] == 'T');
+                    $('#controls-b-checkbox').prop('checked', values[7] == 'T');
+                    $("#controls-submit").click();
+                }
             });
 
-            /* PARKING LOT
+            var plotter = new Plotter();
 
-            ...
+            $("#controls-submit").on("click", function() {
+                plotter.init();
+                var f = convertFn($("#controls-fn").val());
+                var r = 1 * $("#controls-r").val();
+                var i = 1 * $("#controls-i").val();
+                var steps = 1 * $("#controls-steps").val();
+                var distance = 1 * $("#controls-distance").val();
+                var rChecked = $('#controls-r-checkbox').is(':checked');
+                var gChecked = $('#controls-g-checkbox').is(':checked');
+                var bChecked = $('#controls-b-checkbox').is(':checked');
+                //console.log(f, r, i, steps, distance, rChecked, gChecked, bChecked);
+                plotter.start(f, r, i, steps, distance, rChecked, gChecked, bChecked);
+            });
 
-            */
+            $("#controls-submit").click();
 
         </script>
     </body>
 </html>
-
-
-
-
-
