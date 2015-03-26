@@ -1,21 +1,5 @@
-var container, scene, camera, renderer, controls;
-var geometry, sphereGeometry, material, lineMaterial, planeMaterial, sphereMaterial;
 
-var inputPlaneWidth = 10;
-var inputPlaneHeight = 10;
-var inputToResultPlaneDiff = 30;
-
-//var resultPlaneWidth = 20;
-//var resultPlaneHeight = 20;
-
-var Line = function(inputC, resultC, threeLineGeometry){
-    this.inputC = inputC;
-    this.resultC = resultC;
-    this.threeLineGeometry = threeLineGeometry;
-};
-
-function init() {
-    scene = new THREE.Scene();
+var Plotter = function() {
     var SCREEN_WIDTH = window.innerWidth,
         SCREEN_HEIGHT = window.innerHeight,
 
@@ -24,38 +8,40 @@ function init() {
         NEAR = 0.1,
         FAR = 20000;
 
-    camera = new THREE.PerspectiveCamera( VIEW_ANGLE, ASPECT, NEAR, FAR);
-    camera.position.set(50,40,50);
-    camera.lookAt(scene.position);
-    scene.add(camera);
+    this.scene = new THREE.Scene();
 
-    renderer = new THREE.WebGLRenderer({antialias:true});
-    renderer.setClearColor(0xeeeeee);
-    renderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
+    this.camera = new THREE.PerspectiveCamera( VIEW_ANGLE, ASPECT, NEAR, FAR);
+    this.camera.position.set(50,40,50);
+    this.camera.lookAt(this.scene.position);
+    this.scene.add(this.camera);
 
-    container = document.getElementById('ThreeJS');
-    container.appendChild(renderer.domElement);
+    this.renderer = new THREE.WebGLRenderer({antialias:true});
+    this.renderer.setClearColor(0xeeeeee);
+    this.renderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
 
-    controls = new THREE.OrbitControls(camera, renderer.domElement);
+    this.container = document.getElementById('ThreeJS');
+    this.container.appendChild(this.renderer.domElement);
 
-    light = new THREE.DirectionalLight(0xffffff);
+    this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
+
+    var light = new THREE.DirectionalLight(0xffffff);
     light.position.set(1, 1, 1);
-    scene.add(light);
+    this.scene.add(light);
 
     light = new THREE.DirectionalLight(0x002288);
     light.position.set(-1, -1, -1);
-    scene.add(light);
+    this.scene.add(light);
 
     light = new THREE.AmbientLight(0x222222);
-    scene.add(light);
+    this.scene.add(light);
     //var axes = new THREE.AxisHelper(20); scene.add(axes);
 
     // INPUT PLANE
-    geometry = new THREE.PlaneBufferGeometry(inputPlaneWidth, inputPlaneHeight, 32);
-    planeMaterial = new THREE.MeshBasicMaterial({color: 0xbbbbbb, side: THREE.DoubleSide, transparent: true, opacity: 0.5});
-    var plane = new THREE.Mesh(geometry, planeMaterial);
+    this.geometry = new THREE.PlaneBufferGeometry(Plotter.PLANEWIDTH, Plotter.PLANEHEIGHT, 32);
+    this.planeMaterial = new THREE.MeshBasicMaterial({color: 0xbbbbbb, side: THREE.DoubleSide, transparent: true, opacity: 0.5});
+    var plane = new THREE.Mesh(this.geometry, this.planeMaterial);
     //plane.position.set(0, 0, 0);
-    scene.add(plane);
+    this.scene.add(plane);
 
 
     // DRAW LINES
@@ -67,14 +53,14 @@ function init() {
 
     //material = new THREE.LineBasicMaterial({color: 'rgb(0, 255, 0)', linewidth: 4});
 
-    var lines = [];
+    this.lines = [];
 
     var minFact = Number.MAX_VALUE;
     var maxFact = - Number.MAX_VALUE;
 
     //do the calculations
-    for(var r = - inputPlaneWidth / 2; r <= inputPlaneWidth / 2; r = r + steps){
-        for(var i = - inputPlaneHeight / 2; i <= inputPlaneHeight / 2; i = i + steps){
+    for(var r = - Plotter.PLANEWIDTH / 2; r <= Plotter.PLANEWIDTH / 2; r = r + steps){
+        for(var i = - Plotter.PLANEHEIGHT / 2; i <= Plotter.PLANEHEIGHT / 2; i = i + steps){
             var inputC = new C(r, i);
             var resultC = inputC.pow(2); //FUNCTION
             var resR = resultC.r;
@@ -97,13 +83,13 @@ function init() {
             if(resI > resultMaxImg)
                 resultMaxImg = resI;
 
-            geometry = new THREE.Geometry();
+            var geometry = new THREE.Geometry();
             geometry.vertices.push(
                 new THREE.Vector3(inputC.r, inputC.i, 0),
-                new THREE.Vector3(resultC.r, resultC.i, inputToResultPlaneDiff)
+                new THREE.Vector3(resultC.r, resultC.i, Plotter.PLANEDIFF)
             );
-            var line = new Line(inputC, resultC, geometry);
-            lines.push(line)
+            var line = new Plotter.Line(inputC, resultC, geometry);
+            this.lines.push(line)
         }
     }
     //console.log(minFact); console.log(maxFact);
@@ -111,49 +97,63 @@ function init() {
 
 
     //calculate colors and add lines and circles to the scene
-    for(var i=0; i < lines.length; i++){
-        var inputC = lines[i].inputC;
+    for(var i=0; i < this.lines.length; i++){
+        var inputC = this.lines[i].inputC;
 
-        var resultC = lines[i].resultC;
+        var resultC = this.lines[i].resultC;
         var fact = inputC.length / resultC.length;
         if(isNaN(fact))
             fact = 0;
         else
             fact = Math.pow(fact, 0.5);
 
-        sphereGeometry = new THREE.SphereGeometry(0.1 + 0.2 * fact, 16, 16);
+        var sphereGeometry = new THREE.SphereGeometry(0.1 + 0.2 * fact, 16, 16);
 
         fact = Math.round((1 - fact) * 255);
         var colStr = 'rgb(' + 0 + ',' + 0 + ',' + fact + ')';
-        lineMaterial = new THREE.LineBasicMaterial({color: colStr, linewidth: 1});
-        sphereMaterial = new THREE.MeshLambertMaterial({color: colStr});
+        var lineMaterial = new THREE.LineBasicMaterial({color: colStr, linewidth: 1});
+        var sphereMaterial = new THREE.MeshLambertMaterial({color: colStr});
 
         var sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
         sphere.position.set(inputC.r, inputC.i, 0);
-        scene.add(sphere);
+        this.scene.add(sphere);
 
         var sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
-        sphere.position.set(resultC.r, resultC.i, inputToResultPlaneDiff);
-        scene.add(sphere);
+        sphere.position.set(resultC.r, resultC.i, Plotter.PLANEDIFF);
+        this.scene.add(sphere);
 
-        scene.add(new THREE.Line(lines[i].threeLineGeometry, lineMaterial));
+        this.scene.add(new THREE.Line(this.lines[i].threeLineGeometry, lineMaterial));
     }
 
     // RESULT PLANE
     var resultPlaneWidth = resultMinReal * -1 + Math.abs(resultMaxReal);
     var resultPlaneHeight = resultMinImg * -1 + Math.abs(resultMaxImg);
-    geometry = new THREE.PlaneBufferGeometry(resultPlaneWidth, resultPlaneHeight, 32);
-    plane = new THREE.Mesh(geometry, planeMaterial);
+    this.geometry = new THREE.PlaneBufferGeometry(resultPlaneWidth, resultPlaneHeight, 32);
+    this.plane = new THREE.Mesh(this.geometry, this.planeMaterial);
     var middleDiffReal = resultMinReal + resultPlaneWidth / 2;
     var middleDiffImg = resultMinImg + resultPlaneHeight / 2;
     //console.log(resultMinReal); console.log(resultMaxReal); console.log(resultMinImg); console.log(resultMaxImg);
     //console.log(resultPlaneWidth); console.log(resultPlaneHeight); console.log(middleDiffReal); console.log(middleDiffImg);
-    plane.position.set(middleDiffReal, middleDiffImg, inputToResultPlaneDiff);
-    scene.add(plane);
-}
+    this.plane.position.set(middleDiffReal, middleDiffImg, Plotter.PLANEDIFF);
+    this.scene.add(this.plane);
+};
 
+Plotter.prototype = {
+    draw: function() {
+        requestAnimationFrame(this.draw.bind(this));
+        this.renderer.render(this.scene, this.camera);
+    },
 
-function animate() {
-    requestAnimationFrame(animate);
-    renderer.render(scene, camera);
-}
+    start: function() {
+        this.draw();
+    }
+};
+
+Plotter.Line = function(inputC, resultC, threeLineGeometry){
+    this.inputC = inputC;
+    this.resultC = resultC;
+    this.threeLineGeometry = threeLineGeometry;
+};
+Plotter.PLANEWIDTH = 10;
+Plotter.PLANEHEIGHT = 10;
+Plotter.PLANEDIFF = 30;
