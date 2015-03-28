@@ -11,41 +11,108 @@
         <script type="text/javascript" src="js/plotter.js"></script>
         <style>
             #controls {
-                width: 100%;
+                width: 250px;
                 position: fixed;
-                top: 0;
-                left: 0;
-                right: 0;
                 z-index: 5;
                 background: #FFF;
-                padding: 10px 0;
-                border-bottom: 1px solid #AAA;
-                text-align: center;
+                padding: 10px;
+                border: 1px solid #AAA;
                 font-family: Georgia, sans-serif;
                 font-size:  14px;
+                border-spacing: 6px;
+            }
+            .inactive {
+                color: #AAA; 
             }
         </style>
     </head>
     <body>
 
-        <div id="controls">
-            <b>f(c) =</b> <input type="text" id="controls-fn" value="c.pow(2)" size="16" />&nbsp;
-            <b>width</b>: <input title="real length of the input plane" type="number" value="5" id="controls-r" style="width:40px"/>&nbsp;
-            <b>height</b>: <input title="img length of the input plane" type="number" value="5" id="controls-i" style="width:40px"/>&nbsp;
-            <b>delta</b>: <input title="delta in which the input plane is being stepped through for input values c" type="number" value="0.5" id="controls-steps" style="width:50px"/>&nbsp;
-            <b>distance</b>: <input title="distance between input and result plane" type="number" value="30" id="controls-distance" style="width:40px" />&nbsp;
-            <b>color</b>: <input title="toggling the r part in the color coding of the lines" type="checkbox" id="controls-r-checkbox" checked><input title="toggling g" type="checkbox" id="controls-g-checkbox"><input title="toggling b" type="checkbox" id="controls-b-checkbox">&nbsp;
-            <input  type="submit" id="controls-submit" value="Render"/>&nbsp;&nbsp;&nbsp;
-            examples: <select id='examplesList' style="width:70px">
-                <option value="c.pow(2)_5_5_0.5_30_T_F_F">default</option>
-                <option value="c.pow(2)_2_2_0.22_6_F_T_T">1</option>
-                <option value="c.mul(new C(0,1))_3_3_0.35_10_F_F_F">2</option>
-                <option value="c.pow(2).div(new C(-2,2))_9_9_0.6_60_T_T_F">3</option>
-                <option value="c.div(new C(1,1))_10_10_0.8_60_T_F_T">4</option>
-                <option>add one?</option>  
-            </select>
-        </div>
+        <table id="controls">
+            <tr>
+                <td>
+                    <b>f(c) =</b>
+                </td>
+                <td>
+                    <input type="text" id="controls-fn" value="c.pow(2)" size="16" />
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <div class="inactiveAfterFirstFuncCall"><b>width</b>:</div>
+                </td>
+                <td>
+                    <input title="real length of the input plane" type="number" value="5" id="controls-r" class="inactiveAfterFirstFuncCall" style="width:40px"/>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <div class="inactiveAfterFirstFuncCall"><b>height</b>:</div>
+                </td>
+                <td>
+                    <input title="img length of the input plane" type="number" value="5" id="controls-i" class="inactiveAfterFirstFuncCall" style="width:40px"/>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <div class="inactiveAfterFirstFuncCall"><b>delta</b>:</div>
+                </td>
+                <td>
+                    <input title="delta in which the input plane is being stepped through for input values c" type="number" value="0.5" id="controls-delta" class="inactiveAfterFirstFuncCall" style="width:50px"/>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <b>distance</b>:
+                </td>
+                <td>
+                    <input title="distance between input and result plane" type="number" value="30" id="controls-distance" style="width:40px" />
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <b>planes/dots:</b>
+                </td>
+                <td>
+                    <input title="show planes or not" type="checkbox" id="controls-showPlanes" checked>
+                    <input title="show dots where lines start and end or not" type="checkbox" id="controls-showDots" checked>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <b>color</b>:
+                </td>
+                <td>
+                    <input title="toggling the r part in the color coding of the lines" type="checkbox" id="controls-r-checkbox" checked>
+                    <input title="toggling g" type="checkbox" id="controls-g-checkbox">
+                    <input title="toggling b" type="checkbox" id="controls-b-checkbox">
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <input  type="submit" id="controls-submit" value="render"/>
+                </td>
+                <td>
+                    examples:
+                    <select id='examplesList' style="width:70px">
+                        <option value="c.pow(2)_5_5_0.5_30_T_F_F">default</option>
+                        <option value="c.pow(2)_2_2_0.22_6_F_T_T">1</option>
+                        <option value="c.mul(new C(0,1))_3_3_0.35_10_F_F_F">2</option>
+                        <option value="c.pow(2).div(new C(-2,2))_9_9_0.6_60_T_T_F">3</option>
+                        <option value="c.div(new C(1,1))_10_10_0.8_60_T_F_T">4</option>
+                        <option>add one?</option>  
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <input  type="submit" id="controls-submit-recursive" value="next recursive step"/>
+                </td>
+            </tr>
+        </table>
+
         <div id="ThreeJS" style="z-index: 1; position: absolute; left:0px; top:0px"></div>
+
 
         <script>
 
@@ -57,7 +124,7 @@
                     $("#controls-fn").val(values[0]);
                     $("#controls-r").val(values[1]);
                     $("#controls-i").val(values[2]);
-                    $("#controls-steps").val(values[3]);
+                    $("#controls-delta").val(values[3]);
                     $("#controls-distance").val(values[4]);
                     $('#controls-r-checkbox').prop('checked', values[5] == 'T');
                     $('#controls-g-checkbox').prop('checked', values[6] == 'T');
@@ -68,21 +135,40 @@
 
             var plotter = new Plotter();
 
-            $("#controls-submit").on("click", function() {
-                plotter.init();
-                var f = convertFn($("#controls-fn").val());
-                var r = 1 * $("#controls-r").val();
-                var i = 1 * $("#controls-i").val();
-                var steps = 1 * $("#controls-steps").val();
-                var distance = 1 * $("#controls-distance").val();
+            $("#controls-submit").on("click", function() { 
+                var func = convertFn($("#controls-fn").val());
+                var rWidth = 1 * $("#controls-r").val();
+                var iHeight = 1 * $("#controls-i").val();
+                var delta = 1 * $("#controls-delta").val();
+                var planeDistance = 1 * $("#controls-distance").val();
                 var rChecked = $('#controls-r-checkbox').is(':checked');
                 var gChecked = $('#controls-g-checkbox').is(':checked');
                 var bChecked = $('#controls-b-checkbox').is(':checked');
-                //console.log(f, r, i, steps, distance, rChecked, gChecked, bChecked);
-                plotter.start(f, r, i, steps, distance, rChecked, gChecked, bChecked);
+                var showPlanes = $('#controls-showPlanes').is(':checked');
+                var showDots = $('#controls-showDots').is(':checked');
+                plotter.init(rWidth, iHeight, delta, showPlanes);
+                plotter.plotNextFunctionCall(func, planeDistance, rChecked, gChecked, bChecked, showPlanes, showDots);
             });
 
             $("#controls-submit").click();
+
+            $("#controls-submit-recursive").mousemove(function(){
+                $(".inactiveAfterFirstFuncCall").addClass('inactive');
+            });
+            $("#controls-submit-recursive").mouseleave(function(){
+                $(".inactiveAfterFirstFuncCall").removeClass('inactive');
+            });
+
+            $("#controls-submit-recursive").on("click", function() { 
+                var func = convertFn($("#controls-fn").val());
+                var planeDistance = 1 * $("#controls-distance").val();
+                var rChecked = $('#controls-r-checkbox').is(':checked');
+                var gChecked = $('#controls-g-checkbox').is(':checked');
+                var bChecked = $('#controls-b-checkbox').is(':checked');
+                var showPlanes = $('#controls-showPlanes').is(':checked');
+                var showDots = $('#controls-showDots').is(':checked');
+                plotter.plotNextFunctionCall(func, planeDistance, rChecked, gChecked, bChecked, showPlanes, showDots);
+            });
 
         </script>
     </body>

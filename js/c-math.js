@@ -3,7 +3,7 @@ var C = function(r, i){
     this.r = r;
     this.i = i;
     this.length = Math.sqrt(Math.pow(r,2) + Math.pow(i,2));
-    this.angle = Math.atan(i / r);
+    //this.angle = Math.atan(i / r);
 };
 
 C.prototype = {
